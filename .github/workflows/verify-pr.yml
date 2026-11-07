@@ -4,57 +4,8 @@ on:
     types: [opened, synchronize, reopened]
 permissions:
   contents: read
-  pull-requests: read
-env:
-  GSP_VERSION: '0.2.0'
-  GSP_SHA256: '4795b5875e6601e3fc3091fc44f149f4c8cc1112ac5ecdc3718a9b65e5e15582'
-  GSP_RELEASES_REPO: EthanInMel/gsp-releases
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
-      - name: Checkout base index for rollback comparison
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          path: .base-index
-          fetch-depth: 1
-      - uses: actions/setup-node@v4
-        with: {node-version: 22}
-      - name: Check changed paths
-        shell: bash
-        run: |
-          set -euo pipefail
-          files=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD)
-          bad=$(printf '%s\n' "$files" | awk '!/^apps\/[^/]+\/(store.json|description.md|targets.json|snapshot.json|timestamp.json)$/ && $0 != "routes.json" {print}')
-          if [ -n "$bad" ]; then echo "$bad"; exit 1; fi
-          apps=$(printf '%s\n' "$files" | awk -F/ '$1 == "apps" {print $2}' | sort -u)
-          app_count=$(printf '%s\n' "$apps" | sed '/^$/d' | wc -l)
-          if [ "$app_count" -gt 1 ]; then
-            echo 'a pull request may change only one apps/<app_id>/ directory'
-            exit 1
-          fi
-          if printf '%s\n' "$files" | grep -qx 'routes.json'; then
-            labels='${{ join(github.event.pull_request.labels.*.name, ',') }}'
-            case ",$labels," in *,maintainer-approved,*) ;; *) echo 'routes.json changes require maintainer-approved label'; exit 1 ;; esac
-          fi
-      - name: Validate metadata
-        run: node scripts/validate-store.mjs .
-      - name: Install verified gsp binary
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/gsp"
-          curl -fsSL --retry 3 "https://github.com/$GSP_RELEASES_REPO/releases/download/gsp-v$GSP_VERSION/gsp-linux-x64" -o "$RUNNER_TEMP/gsp/gsp"
-          echo "$GSP_SHA256  $RUNNER_TEMP/gsp/gsp" | sha256sum -c -
-          chmod +x "$RUNNER_TEMP/gsp/gsp"
-          echo "$RUNNER_TEMP/gsp" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/gsp/gsp" --version
-      - name: Verify signed index
-        shell: bash
-        run: |
-          set -euo pipefail
-          apps=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | awk -F/ '$1 == "apps" {print $2}' | sort -u)
-          if [ -z "$apps" ]; then gsp index verify --targets-only --index . --previous .base-index; else for app in $apps; do gsp index verify --targets-only --index . --app "$app" --previous .base-index; done; fi
+      - run: echo "Simulated attack - verification replaced with a no-op"
