@@ -1,0 +1,36 @@
+name: timestamp
+on:
+  schedule: [{cron: '17 */6 * * *'}]
+  workflow_dispatch:
+permissions: {contents: write}
+env:
+  GSP_VERSION: '0.1.0'
+  GSP_SHA256: '7e6f1c0b7a4d6176a0e137f55a31e0f88f62872ebd06333ea3516738362de24b'
+  GSP_RELEASES_REPO: EthanInMel/gsp-releases
+jobs:
+  timestamp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Install verified gsp binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/gsp"
+          curl -fsSL --retry 3 "https://github.com/$GSP_RELEASES_REPO/releases/download/gsp-v$GSP_VERSION/gsp-linux-x64" -o "$RUNNER_TEMP/gsp/gsp"
+          echo "$GSP_SHA256  $RUNNER_TEMP/gsp/gsp" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/gsp/gsp"
+          echo "$RUNNER_TEMP/gsp" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/gsp/gsp" --version
+      - name: Refresh timestamps
+        env:
+          GSP_ONLINE_KEY: ${{ secrets.GSP_ONLINE_KEY }}
+        run: gsp index timestamp --index . --all
+      - name: Commit timestamps
+        run: |
+          git config user.name github-actions[bot]; git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          set -euo pipefail
+          git add apps
+          if ! git diff --cached --quiet; then git commit -m 'chore: refresh timestamps'; fi
+          git push || { git pull --rebase && git push; }
