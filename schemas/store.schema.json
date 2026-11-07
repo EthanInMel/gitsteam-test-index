@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitsteam.example/schemas/store.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "summary", "tags", "screenshots", "cover", "requirements", "paid", "price_display", "developer", "homepage", "platforms"],
+  "properties": {
+    "title": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "string", "minLength": 1}},
+    "summary": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "string", "minLength": 1}},
+    "tags": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,31}$"}},
+    "screenshots": {"type": "array", "items": {"$ref": "#/$defs/media"}},
+    "cover": {"$ref": "#/$defs/media"},
+    "requirements": {"type": "object", "additionalProperties": {"type": "string"}},
+    "paid": {"type": "boolean"},
+    "price_display": {"type": "string"},
+    "developer": {"type": "string", "minLength": 1},
+    "homepage": {"type": "string", "format": "uri", "pattern": "^https://"},
+    "platforms": {"type": "array", "minItems": 1, "items": {"enum": ["windows-x64", "linux-x64", "macos-arm64", "macos-x64"]}}
+  },
+  "$defs": {
+    "media": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "blake3", "width", "height"],
+      "properties": {
+        "url": {"type": "string", "pattern": "^https://"},
+        "blake3": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

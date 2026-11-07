@@ -1,0 +1,40 @@
+{
+  "title": {
+    "en": "GitHub Test Build"
+  },
+  "summary": {
+    "en": "A 64 MiB synthetic build served from GitHub Releases."
+  },
+  "short_description": "Synthetic test build for GitSteam validation.",
+  "tags": [
+    "test",
+    "windows"
+  ],
+  "screenshots": [
+    {
+      "url": "https://github.com/EthanInMel/gitsteam-test-builds/releases/download/media/cover.png",
+      "blake3": "58af551200a290cffeb821534f1d51188d2a4460c5735f32699b9485964bd2a0",
+      "width": 1600,
+      "height": 900
+    }
+  ],
+  "requirements": {
+    "os": "Windows 10 64-bit",
+    "cpu": "2 cores",
+    "ram": "2 GB",
+    "gpu": "None"
+  },
+  "paid": false,
+  "price_display": "Free",
+  "developer": "GitSteam Test",
+  "homepage": "https://github.com/EthanInMel/gitsteam-test-builds",
+  "platforms": [
+    "windows-x64"
+  ],
+  "cover": {
+    "url": "https://github.com/EthanInMel/gitsteam-test-builds/releases/download/media/cover.png",
+    "blake3": "58af551200a290cffeb821534f1d51188d2a4460c5735f32699b9485964bd2a0",
+    "width": 1600,
+    "height": 900
+  }
+}
