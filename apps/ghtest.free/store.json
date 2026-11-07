@@ -5,7 +5,7 @@
   "summary": {
     "en": "A 64 MiB synthetic build served from GitHub Releases."
   },
-  "short_description": "Synthetic test build for GitSteam validation.",
+  "short_description": "Synthetic test build for GitSteam validation (PR test).",
   "tags": [
     "test",
     "windows"
