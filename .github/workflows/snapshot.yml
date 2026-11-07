@@ -2,20 +2,28 @@ name: snapshot
 on:
   push:
     branches: [main]
+  schedule: [{cron: '47 2 * * *'}]
   workflow_dispatch:
 permissions:
   contents: write
+  actions: write
+  pages: write
+  id-token: write
 env:
-  GSP_VERSION: '0.1.0'
-  GSP_SHA256: '7e6f1c0b7a4d6176a0e137f55a31e0f88f62872ebd06333ea3516738362de24b'
+  GSP_VERSION: '0.2.0'
+  GSP_SHA256: '4795b5875e6601e3fc3091fc44f149f4c8cc1112ac5ecdc3718a9b65e5e15582'
   GSP_RELEASES_REPO: EthanInMel/gsp-releases
 jobs:
   snapshot:
-    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
+    concurrency:
+      group: index-signing-main
+      cancel-in-progress: false
+    outputs:
+      sha: ${{ steps.sign.outputs.sha }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with: {fetch-depth: 0, ref: main}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -29,17 +37,14 @@ jobs:
           chmod +x "$RUNNER_TEMP/gsp/gsp"
           echo "$RUNNER_TEMP/gsp" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/gsp/gsp" --version
-      - name: Snapshot changed apps
+      - name: Sign and push current main
+        id: sign
         env:
           GSP_ONLINE_KEY: ${{ secrets.GSP_ONLINE_KEY }}
         shell: bash
-        run: |
-          set -euo pipefail
-          for app in $(find apps -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort); do gsp index snapshot --index . --app "$app"; done
-      - name: Commit snapshots
-        run: |
-          git config user.name github-actions[bot]; git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          set -euo pipefail
-          git add apps
-          if ! git diff --cached --quiet; then git commit -m 'chore: refresh snapshots'; fi
-          git push || { git pull --rebase && git push; }
+        run: bash scripts/sign-index.sh snapshot
+  pages:
+    needs: snapshot
+    uses: ./.github/workflows/pages.yml
+    with:
+      sha: ${{ needs.snapshot.outputs.sha }}

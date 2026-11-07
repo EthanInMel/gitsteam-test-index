@@ -6,6 +6,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 jobs:
   merge:
     if: github.event.workflow_run.conclusion == 'success'
@@ -24,38 +25,4 @@ jobs:
           VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         shell: bash
-        run: |
-          set -euo pipefail
-          sha="$VERIFIED_SHA"
-          number=$(jq -r '.workflow_run.pull_requests[0].number // empty' "$GITHUB_EVENT_PATH")
-          if [ -z "$number" ]; then
-            head_repo=$(jq -r '.workflow_run.head_repository.full_name // empty' "$GITHUB_EVENT_PATH")
-            head_branch=$(jq -r '.workflow_run.head_branch // empty' "$GITHUB_EVENT_PATH")
-            test -n "$head_repo" -a -n "$head_branch"
-            gh api --method GET "repos/$REPO/pulls" -f state=open \
-              -f "head=${head_repo%%/*}:$head_branch" --paginate --slurp > "$RUNNER_TEMP/pr-candidates.json"
-            number=$(jq -r --arg sha "$sha" --arg repo "$head_repo" \
-              '[.[][] | select(.head.sha == $sha and .head.repo.full_name == $repo) | .number][0] // empty' \
-              "$RUNNER_TEMP/pr-candidates.json")
-          fi
-          test -n "$number"
-          [[ "$number" =~ ^[0-9]+$ ]]
-          gh api "repos/$REPO/pulls/$number" > "$RUNNER_TEMP/pr.json"
-          if ! jq -e --arg sha "$sha" --arg base "$DEFAULT_BRANCH" --arg repo "$REPO" \
-            '.state == "open" and .head.sha == $sha and .base.ref == $base and .base.repo.full_name == $repo' \
-            "$RUNNER_TEMP/pr.json" > /dev/null; then
-            echo 'Maintainer merge required: PR head, state, or base no longer matches.'
-            exit 0
-          fi
-          gh api "repos/$REPO/pulls/$number/files?per_page=100" --paginate --slurp > "$RUNNER_TEMP/pr-files-pages.json"
-          jq 'add' "$RUNNER_TEMP/pr-files-pages.json" > "$RUNNER_TEMP/pr-files.json"
-          # GitHub caps this endpoint at 3000 files. Fail closed on incomplete diffs.
-          if [ "$(jq length "$RUNNER_TEMP/pr-files.json")" != "$(jq .changed_files "$RUNNER_TEMP/pr.json")" ]; then
-            echo 'Maintainer merge required: incomplete PR file list.'
-            exit 0
-          fi
-          if ! node scripts/check-pr-files.mjs "$RUNNER_TEMP/pr-files.json"; then
-            echo 'Automatic merge skipped; see the path policy reason above.'
-            exit 0
-          fi
-          gh pr merge "$number" --squash --match-head-commit "$sha" --repo "$REPO"
+        run: bash scripts/merge-pr.sh

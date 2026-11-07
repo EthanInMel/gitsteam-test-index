@@ -6,8 +6,8 @@ permissions:
   contents: read
   pull-requests: read
 env:
-  GSP_VERSION: '0.1.0'
-  GSP_SHA256: '7e6f1c0b7a4d6176a0e137f55a31e0f88f62872ebd06333ea3516738362de24b'
+  GSP_VERSION: '0.2.0'
+  GSP_SHA256: '4795b5875e6601e3fc3091fc44f149f4c8cc1112ac5ecdc3718a9b65e5e15582'
   GSP_RELEASES_REPO: EthanInMel/gsp-releases
 jobs:
   verify:
@@ -57,4 +57,4 @@ jobs:
         run: |
           set -euo pipefail
           apps=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | awk -F/ '$1 == "apps" {print $2}' | sort -u)
-          if [ -z "$apps" ]; then gsp index verify --index . --previous .base-index; else for app in $apps; do gsp index verify --index . --app "$app" --previous .base-index; done; fi
+          if [ -z "$apps" ]; then gsp index verify --targets-only --index . --previous .base-index; else for app in $apps; do gsp index verify --targets-only --index . --app "$app" --previous .base-index; done; fi

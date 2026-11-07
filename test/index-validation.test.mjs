@@ -1,17 +1,19 @@
 ﻿import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 const dir = path.resolve(import.meta.dirname, "..");
+const fixture = path.join(dir, "test/fixtures/index");
+const scratch = path.join(dir, "test/.tmp");
+fs.mkdirSync(scratch, { recursive: true });
 const validator = path.join(dir, "scripts", "validate-store.mjs");
 const builder = path.join(dir, "scripts", "build-api.mjs");
 
 function copyExample() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "gitsteam-index-"));
-  fs.cpSync(dir, root, { recursive: true });
+  const root = fs.mkdtempSync(path.join(scratch, "gitsteam-index-"));
+  fs.cpSync(fixture, root, { recursive: true });
   fs.rmSync(path.join(root, "dist"), { recursive: true, force: true });
   return root;
 }

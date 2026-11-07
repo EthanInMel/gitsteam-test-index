@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "expires": "2099-01-01T00:00:00Z",
+  "channels": {
+    "stable": {
+      "version": "0.1.0",
+      "platform": "windows-x64",
+      "manifest": {"release_tag": "example-v0.1.0", "asset_name": "manifest.cbor.zst", "size": 0, "blake3": "0000000000000000000000000000000000000000000000000000000000000000"},
+      "encrypted": false,
+      "key_id": 0
+    }
+  },
+  "sources": [{"id": "github", "kind": "github-release", "url_template": "https://github.com/example/example-game/releases/download/{release}/{pack_id}.gspack", "priority": 1}],
+  "signatures": []
+}

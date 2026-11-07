@@ -1,0 +1,15 @@
+{
+  "title": {"en": "Example Game"},
+  "summary": {"en": "A small game used to demonstrate the GitSteam index."},
+  "tags": ["demo", "action"],
+  "screenshots": [
+    {"url": "https://example.com/example-game/screenshot-1.png", "blake3": "0000000000000000000000000000000000000000000000000000000000000000", "width": 1920, "height": 1080}
+  ],
+  "cover": {"url": "https://example.com/example-game/cover.png", "blake3": "1111111111111111111111111111111111111111111111111111111111111111", "width": 1600, "height": 900},
+  "requirements": {"os": "Windows 10 64-bit", "cpu": "4 cores", "ram": "8 GB", "gpu": "DX12"},
+  "paid": false,
+  "price_display": "Free",
+  "developer": "Example Studio",
+  "homepage": "https://example.com/example-game",
+  "platforms": ["windows-x64"]
+}

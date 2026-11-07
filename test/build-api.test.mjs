@@ -4,12 +4,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 const dir = path.resolve(import.meta.dirname, "..");
+const fixture = path.join(dir, "test/fixtures/index");
+const scratch = path.join(dir, "test/.tmp");
+fs.mkdirSync(scratch, { recursive: true });
 const build = path.join(dir, "scripts/build-api.mjs");
 test("build is deterministic and paginated", () => {
-  const a = fs.mkdtempSync(path.join(path.dirname(dir), "api-a-"));
-  const b = fs.mkdtempSync(path.join(path.dirname(dir), "api-b-"));
+  const a = fs.mkdtempSync(path.join(scratch, "api-a-"));
+  const b = fs.mkdtempSync(path.join(scratch, "api-b-"));
   for (const x of [a, b]) {
-    fs.cpSync(dir, path.join(x, "index"), { recursive: true });
+    fs.cpSync(fixture, path.join(x, "index"), { recursive: true });
     const base = path.join(x, "index");
     const r = spawnSync(
       process.execPath,

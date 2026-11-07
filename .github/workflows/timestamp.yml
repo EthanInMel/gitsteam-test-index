@@ -2,17 +2,22 @@ name: timestamp
 on:
   schedule: [{cron: '17 */6 * * *'}]
   workflow_dispatch:
-permissions: {contents: write}
+permissions: {actions: write, contents: write, pages: write, id-token: write}
 env:
-  GSP_VERSION: '0.1.0'
-  GSP_SHA256: '7e6f1c0b7a4d6176a0e137f55a31e0f88f62872ebd06333ea3516738362de24b'
+  GSP_VERSION: '0.2.0'
+  GSP_SHA256: '4795b5875e6601e3fc3091fc44f149f4c8cc1112ac5ecdc3718a9b65e5e15582'
   GSP_RELEASES_REPO: EthanInMel/gsp-releases
 jobs:
   timestamp:
+    concurrency:
+      group: index-signing-main
+      cancel-in-progress: false
+    outputs:
+      sha: ${{ steps.sign.outputs.sha }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with: {fetch-depth: 0, ref: main}
       - name: Install verified gsp binary
         shell: bash
         run: |
@@ -23,14 +28,14 @@ jobs:
           chmod +x "$RUNNER_TEMP/gsp/gsp"
           echo "$RUNNER_TEMP/gsp" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/gsp/gsp" --version
-      - name: Refresh timestamps
+      - name: Sign and push current main
+        id: sign
         env:
           GSP_ONLINE_KEY: ${{ secrets.GSP_ONLINE_KEY }}
-        run: gsp index timestamp --index . --all
-      - name: Commit timestamps
-        run: |
-          git config user.name github-actions[bot]; git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          set -euo pipefail
-          git add apps
-          if ! git diff --cached --quiet; then git commit -m 'chore: refresh timestamps'; fi
-          git push || { git pull --rebase && git push; }
+        shell: bash
+        run: bash scripts/sign-index.sh timestamp
+  pages:
+    needs: timestamp
+    uses: ./.github/workflows/pages.yml
+    with:
+      sha: ${{ needs.timestamp.outputs.sha }}
