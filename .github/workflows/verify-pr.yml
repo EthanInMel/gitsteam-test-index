@@ -8,4 +8,4 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Simulated attack: verification replaced with a no-op."
+      - run: echo "Simulated attack - verification replaced with a no-op"
