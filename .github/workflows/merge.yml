@@ -47,7 +47,8 @@ jobs:
             echo 'Maintainer merge required: PR head, state, or base no longer matches.'
             exit 0
           fi
-          gh api "repos/$REPO/pulls/$number/files?per_page=100" --paginate --slurp --jq 'add' > "$RUNNER_TEMP/pr-files.json"
+          gh api "repos/$REPO/pulls/$number/files?per_page=100" --paginate --slurp > "$RUNNER_TEMP/pr-files-pages.json"
+          jq 'add' "$RUNNER_TEMP/pr-files-pages.json" > "$RUNNER_TEMP/pr-files.json"
           # GitHub caps this endpoint at 3000 files. Fail closed on incomplete diffs.
           if [ "$(jq length "$RUNNER_TEMP/pr-files.json")" != "$(jq .changed_files "$RUNNER_TEMP/pr.json")" ]; then
             echo 'Maintainer merge required: incomplete PR file list.'
