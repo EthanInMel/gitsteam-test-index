@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Application directory file layout",
+  "description": "Logical mapping of filenames to decoded contents. Developer hosting serves the three developer files at the route metadata_url. Aggregation copies their exact raw bytes to apps/<id>/; central online signing supplies snapshot and timestamp.",
+  "$ref": "#/$defs/developer",
+  "$defs": {
+    "files": {
+      "type": "object",
+      "properties": {
+        "targets.json": {"$ref": "app-targets.schema.json"},
+        "store.json": {"$ref": "store.schema.json"},
+        "description.md": {"type": "string"},
+        "snapshot.json": {"type": "object", "required": ["signed", "signatures"]},
+        "timestamp.json": {"type": "object", "required": ["signed", "signatures"]}
+      },
+      "additionalProperties": false
+    },
+    "developer": {
+      "allOf": [{"$ref": "#/$defs/files"}],
+      "required": ["targets.json", "store.json", "description.md"],
+      "not": {"anyOf": [{"required": ["snapshot.json"]}, {"required": ["timestamp.json"]}]}
+    },
+    "central": {
+      "allOf": [{"$ref": "#/$defs/files"}],
+      "required": ["targets.json", "store.json", "description.md", "snapshot.json", "timestamp.json"]
+    }
+  }
+}

@@ -23,10 +23,11 @@ for (const file of ["root.json", "routes.json"])
   if (fs.existsSync(path.join(root, file)))
     copy(path.join(root, file), path.join(out, file));
 const appsRoot = path.join(root, "apps");
+const routes = JSON.parse(fs.readFileSync(path.join(root, "routes.json"), "utf8")).signed.apps;
 const apps = fs.existsSync(appsRoot)
   ? fs
       .readdirSync(appsRoot, { withFileTypes: true })
-      .filter((e) => e.isDirectory())
+      .filter((e) => e.isDirectory() && Object.hasOwn(routes, e.name))
       .map((e) => e.name)
       .sort()
   : [];

@@ -6,19 +6,20 @@ permissions:
   contents: read
   pull-requests: read
 env:
-  VESPER_VERSION: '0.4.0'
-  VESPER_SHA256: '8401d69fe9f9e3f87886f8a332fdae2ff4d61dbd7dfead2602561775d70d4bb0'
+  VESPER_VERSION: '0.5.0'
+  VESPER_SHA256: 'fd2018a4d1fa8351c64fb4287f279cd80e2f88e51e56372bf142c777c49c85f7'
   VESPER_RELEASES_REPO: EthanInMel/gsp-releases
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with: {fetch-depth: 0}
+        with: {fetch-depth: 0, persist-credentials: false}
       - name: Checkout base index for rollback comparison
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
           path: .base-index
           fetch-depth: 1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0

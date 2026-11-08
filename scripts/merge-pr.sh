@@ -26,7 +26,10 @@ if [ "$(data count "$RUNNER_TEMP/pr-files.json")" != "$(data changed "$RUNNER_TE
   echo 'Maintainer merge required: incomplete PR file list.'
   exit 0
 fi
-if ! node scripts/check-pr-files.mjs "$RUNNER_TEMP/pr-files.json"; then
+# Re-read current registry data rather than trusting the job's earlier checkout.
+gh api "repos/$REPO/contents/routes.json?ref=$DEFAULT_BRANCH" \
+  --header 'Accept: application/vnd.github.raw+json' > "$RUNNER_TEMP/routes.json"
+if ! node scripts/check-pr-files.mjs "$RUNNER_TEMP/pr-files.json" "$RUNNER_TEMP/routes.json"; then
   echo 'Automatic merge skipped; see the path policy reason above.'
   exit 0
 fi

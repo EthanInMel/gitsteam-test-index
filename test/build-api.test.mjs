@@ -46,3 +46,17 @@ test("build is deterministic and paginated", () => {
   fs.rmSync(a, { recursive: true, force: true });
   fs.rmSync(b, { recursive: true, force: true });
 });
+
+test("removing a route delists retained app files", () => {
+  const temp = fs.mkdtempSync(path.join(scratch, "delist-"));
+  try {
+    fs.cpSync(fixture, temp, {recursive: true});
+    const routes = JSON.parse(fs.readFileSync(path.join(temp, "routes.json"), "utf8"));
+    routes.signed.apps = {};
+    fs.writeFileSync(path.join(temp, "routes.json"), JSON.stringify(routes));
+    const result = spawnSync(process.execPath, [build, "--index", temp], {encoding: "utf8"});
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(temp, "dist/api/v1/apps/page-1.json"))).total, 0);
+    assert.equal(fs.existsSync(path.join(temp, "dist/apps/example-game/targets.json")), false);
+  } finally { fs.rmSync(temp, {recursive: true, force: true}); }
+});

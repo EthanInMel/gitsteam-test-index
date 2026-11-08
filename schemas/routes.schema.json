@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Root-signed application registry",
+  "type": "object",
+  "required": ["signed", "signatures"],
+  "properties": {
+    "signed": {
+      "type": "object",
+      "required": ["_type", "spec_version", "version", "expires", "apps"],
+      "properties": {
+        "_type": {"const": "routes"},
+        "spec_version": {"const": "1.0.0"},
+        "version": {"type": "integer", "minimum": 1},
+        "expires": {"type": "integer", "minimum": 1},
+        "apps": {
+          "type": "object",
+          "propertyNames": {"pattern": "^(?!\\.\\.?$)[A-Za-z0-9._-]+$"},
+          "additionalProperties": {
+            "type": "object",
+            "required": ["keys", "threshold"],
+            "additionalProperties": false,
+            "properties": {
+              "keys": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}},
+              "threshold": {"type": "integer", "minimum": 1},
+              "metadata_url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^(https://|http://127\\.0\\.0\\.1(?=[:/]))",
+                "description": "Developer metadata base directory. HTTPS is required; HTTP 127.0.0.1 is for local mocks only. No credentials, query or fragment. Contains targets.json, store.json and description.md. GitHub Release default: https://github.com/OWNER/REPO/releases/download/vesper-metadata/. Omit for repository-hosted app PRs."
+              }
+            }
+          }
+        }
+      }
+    },
+    "signatures": {"type": "array", "minItems": 1}
+  }
+}

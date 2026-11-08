@@ -1,2 +1,4 @@
 .tools/
 dist/
+.aggregate-stage-*/
+.aggregate-backup-*/

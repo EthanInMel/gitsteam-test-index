@@ -5,7 +5,7 @@ import fs from "node:fs";
 const read = name => fs.readFileSync(new URL(`../.github/workflows/${name}.yml`, import.meta.url), "utf8").replace(/\r\n/g, "\n");
 
 test("all external actions have full SHA pins and version comments; shell scripts use env", () => {
-  for (const name of ["merge", "pages", "snapshot", "timestamp", "verify-pr"]) {
+  for (const name of ["merge", "pages", "snapshot", "timestamp", "verify-pr", "aggregate"]) {
     const yaml = read(name);
     for (const line of yaml.split("\n")) {
       if (/uses:/.test(line) && !/uses: \u002e\u002f/.test(line))
@@ -31,7 +31,7 @@ test("verify-pr executes the shared path policy with labels and base SHA through
 });
 
 test("all index jobs install the same checksum-pinned public binary", t => {
-  const pins = ["verify-pr", "snapshot", "timestamp"].map(name => {
+  const pins = ["verify-pr", "snapshot", "timestamp", "aggregate"].map(name => {
     const yaml = read(name);
     assert.doesNotMatch(yaml, /cargo install|actions\/cache|VESPER_REF/);
     assert.match(yaml, /curl -fsSL --retry 3/);
@@ -54,8 +54,9 @@ test("all index jobs install the same checksum-pinned public binary", t => {
   });
   assert.deepEqual(pins[0], pins[1]);
   assert.deepEqual(pins[0], pins[2]);
+  assert.deepEqual(pins[0], pins[3]);
   if (/^0{64}$/.test(pins[0][1])) {
-    t.diagnostic("WARNING: VESPER_SHA256 is the release placeholder; replace all three workflow pins after manual publication.");
+    t.diagnostic("WARNING: VESPER_SHA256 is the release placeholder; replace all workflow pins after manual publication.");
   }
 });
 
@@ -112,4 +113,19 @@ test("signers serialize, regenerate on conflicts and deploy their output SHA", (
   assert.match(pages, /late stale caller/);
   assert.match(pages, /if: needs.build.outputs.current == 'true'/);
   assert.match(pages, /gh workflow run snapshot.yml --ref main/);
+});
+
+test("aggregation runs every fifteen minutes without online keys and dispatches signing", () => {
+  const yaml = read("aggregate");
+  const script = fs.readFileSync(new URL("../scripts/aggregate-index.sh", import.meta.url), "utf8");
+  assert.match(yaml, /cron: '\*\/15 \* \* \* \*'/);
+  assert.match(yaml, /workflow_dispatch:/);
+  assert.match(yaml, /ref: main, persist-credentials: false/);
+  assert.match(yaml, /group: index-signing-main/);
+  assert.doesNotMatch(yaml, /VESPER_ONLINE_KEY|secrets\.|head_sha|pull_request/);
+  assert.match(script, /vesper index aggregate --index \./);
+  assert.match(script, /git diff --cached --quiet/);
+  assert.match(script, /gh workflow run snapshot.yml --ref main/);
+  assert.match(script, /for attempt in 1 2 3/);
+  for (const name of ["snapshot", "timestamp"]) assert.match(read(name), /ref: main, persist-credentials: false/);
 });

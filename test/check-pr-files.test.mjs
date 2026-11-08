@@ -33,3 +33,13 @@ test("checks the old path of renames as well as the new path", () => {
     assert.equal(checkPrFiles([{ filename: "apps/game/store.json", previous_filename }]).allowed, false);
   }
 });
+
+test("developer-hosted app PRs require maintainer handling in either registry", () => {
+  const hosted = { signed: { apps: { game: { metadata_url: "https://example.test/metadata/" } } } };
+  const files = ["apps/game/targets.json"];
+  assert.equal(checkPrFiles(files, [hosted]).allowed, false);
+  assert.equal(checkVerifyPaths(files, "", [hosted]).allowed, false);
+  assert.equal(checkVerifyPaths(files, "maintainer-approved", [hosted]).allowed, true);
+  assert.equal(checkVerifyPaths(files, "", [{signed: {apps: {}}}, hosted]).allowed, false);
+  assert.equal(checkPrFiles([{filename: "apps/game/store.json", previous_filename: "apps/other/store.json"}], [hosted]).allowed, false);
+});

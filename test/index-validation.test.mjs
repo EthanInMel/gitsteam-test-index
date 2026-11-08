@@ -66,6 +66,10 @@ test("build-api groups tags and paginates after 50 apps", () => {
     };
     fs.writeFileSync(path.join(app, "store.json"), JSON.stringify(store));
   }
+  const routesPath = path.join(root, "routes.json");
+  const registry = JSON.parse(fs.readFileSync(routesPath, "utf8"));
+  for (const id of fs.readdirSync(path.join(root, "apps"))) registry.signed.apps[id] = registry.signed.apps["example-game"];
+  fs.writeFileSync(routesPath, JSON.stringify(registry));
   const out = path.join(root, "dist");
   const built = spawnSync(
     process.execPath,

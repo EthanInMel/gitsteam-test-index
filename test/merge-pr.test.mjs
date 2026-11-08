@@ -13,7 +13,7 @@ const bash = process.platform === "win32"
 const available = bash && spawnSync(bash, ["--version"]).status === 0;
 const posix = file => file.replaceAll("\\", "/").replace(/^([A-Za-z]):/, (_, drive) => `/${drive.toLowerCase()}`);
 
-for (const scenario of ["allowed", "path", "incomplete", "head", "fork", "merge-failed"]) {
+for (const scenario of ["allowed", "path", "incomplete", "head", "fork", "hosted", "merge-failed"]) {
   test(`merge shell: ${scenario}`, t => {
     if (!available) { t.skip("Git Bash is unavailable; cannot execute trusted merge shell"); return; }
     const dir = fs.mkdtempSync(path.join(scratch, "merge-"));
@@ -29,7 +29,9 @@ for (const scenario of ["allowed", "path", "incomplete", "head", "fork", "merge-
         if (args.includes("--slurp") && (args.includes("--jq") || args.includes("--template"))) process.exit(9);
         if (args[0] === "api") {
           const endpoint = args.find(arg => arg.startsWith("repos/"));
-          if (endpoint.endsWith("/files?per_page=100")) {
+          if (endpoint.includes("/contents/routes.json?ref=")) {
+            console.log(JSON.stringify({signed:{apps:{game:scenario === "hosted" ? {metadata_url:"https://example.test/"} : {}}}}));
+          } else if (endpoint.endsWith("/files?per_page=100")) {
             console.log(JSON.stringify([[{ filename: scenario === "path" ? ".github/workflows/verify-pr.yml" : "apps/game/store.json" }], []]));
           } else if (endpoint.endsWith("/pulls/1")) {
             console.log(JSON.stringify({state:"open",head:{sha:scenario === "head" ? "changed" : "verified"},
@@ -61,6 +63,7 @@ for (const scenario of ["allowed", "path", "incomplete", "head", "fork", "merge-
       if (scenario === "path") assert.match(result.stdout, /Maintainer merge required for path/);
       if (scenario === "incomplete") assert.match(result.stdout, /incomplete PR file list/);
       if (scenario === "head") assert.match(result.stdout, /head, state, or base/);
+      if (scenario === "hosted") assert.match(result.stdout, /developer-hosted metadata/);
     } finally { fs.rmSync(dir, { recursive: true, force: true }); }
   });
 }

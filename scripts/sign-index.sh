@@ -25,7 +25,7 @@ for attempt in 1 2 3; do
   if ! git diff --cached --quiet; then
     git commit -m "chore: refresh ${mode} metadata"
   fi
-  if git push origin HEAD:main; then
+  if git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push origin HEAD:main; then
     echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
     exit 0
   fi

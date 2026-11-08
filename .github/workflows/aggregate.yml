@@ -1,0 +1,36 @@
+name: aggregate
+on:
+  schedule: [{cron: '*/15 * * * *'}]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+env:
+  VESPER_VERSION: '0.5.0'
+  VESPER_SHA256: 'fd2018a4d1fa8351c64fb4287f279cd80e2f88e51e56372bf142c777c49c85f7'
+  VESPER_RELEASES_REPO: EthanInMel/gsp-releases
+jobs:
+  aggregate:
+    concurrency:
+      group: index-signing-main
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {fetch-depth: 0, ref: main, persist-credentials: false}
+      - name: Install verified vesper binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/vesper"
+          curl -fsSL --retry 3 "https://github.com/$VESPER_RELEASES_REPO/releases/download/vesper-v$VESPER_VERSION/vesper-linux-x64" -o "$RUNNER_TEMP/vesper/vesper"
+          echo "$VESPER_SHA256  $RUNNER_TEMP/vesper/vesper" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/vesper/vesper"
+          echo "$RUNNER_TEMP/vesper" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/vesper/vesper" --version
+      - name: Aggregate and dispatch online signing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: bash scripts/aggregate-index.sh
