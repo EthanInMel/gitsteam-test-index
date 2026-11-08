@@ -25,7 +25,7 @@
     "gpu": "None"
   },
   "paid": false,
-  "price_display": "Free",
+  "price_display": "Free (tampered)",
   "developer": "GitSteam Test",
   "homepage": "https://github.com/EthanInMel/gitsteam-test-builds",
   "platforms": [
