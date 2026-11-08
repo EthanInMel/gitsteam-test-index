@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://gitsteam.example/schemas/store.schema.json",
+  "$id": "https://vesper.example/schemas/store.schema.json",
   "type": "object",
   "additionalProperties": false,
   "required": ["title", "summary", "tags", "screenshots", "cover", "requirements", "paid", "price_display", "developer", "homepage", "platforms"],

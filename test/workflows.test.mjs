@@ -7,18 +7,18 @@ const read = name => fs.readFileSync(new URL(`../.github/workflows/${name}.yml`,
 test("all index jobs install the same checksum-pinned public binary", t => {
   const pins = ["verify-pr", "snapshot", "timestamp"].map(name => {
     const yaml = read(name);
-    assert.doesNotMatch(yaml, /cargo install|actions\/cache|GSP_REF/);
+    assert.doesNotMatch(yaml, /cargo install|actions\/cache|VESPER_REF/);
     assert.match(yaml, /curl -fsSL --retry 3/);
     assert.match(yaml, /sha256sum -c -/);
     assert.match(yaml, /set -euo pipefail/);
-    assert.match(yaml, /https:\/\/github\.com\/\$GSP_RELEASES_REPO\/releases\/download\/gsp-v\$GSP_VERSION\/gsp-linux-x64/);
-    assert.match(yaml, /chmod \+x "\$RUNNER_TEMP\/gsp\/gsp"/);
-    assert.match(yaml, /echo "\$RUNNER_TEMP\/gsp" >> "\$GITHUB_PATH"/);
-    assert.match(yaml, /"\$RUNNER_TEMP\/gsp\/gsp" --version/);
+    assert.match(yaml, /https:\/\/github\.com\/\$VESPER_RELEASES_REPO\/releases\/download\/vesper-v\$VESPER_VERSION\/vesper-linux-x64/);
+    assert.match(yaml, /chmod \+x "\$RUNNER_TEMP\/vesper\/vesper"/);
+    assert.match(yaml, /echo "\$RUNNER_TEMP\/vesper" >> "\$GITHUB_PATH"/);
+    assert.match(yaml, /"\$RUNNER_TEMP\/vesper\/vesper" --version/);
     const env = /^env:\n((?:  [^\n]+\n)+)/m.exec(yaml)?.[1];
     assert.ok(env, `${name} must declare workflow-level pins`);
     const value = key => new RegExp(`^  ${key}: ['"]?([^'"\\s]+)['"]?$`, "m").exec(env)?.[1];
-    const pin = [value("GSP_VERSION"), value("GSP_SHA256"), value("GSP_RELEASES_REPO")];
+    const pin = [value("VESPER_VERSION"), value("VESPER_SHA256"), value("VESPER_RELEASES_REPO")];
     assert.match(pin[0] ?? "", /^\d+\.\d+\.\d+$/);
     assert.match(pin[1] ?? "", /^[0-9a-f]{64}$/);
     assert.equal(pin[2], "EthanInMel/gsp-releases");
@@ -29,7 +29,7 @@ test("all index jobs install the same checksum-pinned public binary", t => {
   assert.deepEqual(pins[0], pins[1]);
   assert.deepEqual(pins[0], pins[2]);
   if (/^0{64}$/.test(pins[0][1])) {
-    t.diagnostic("WARNING: GSP_SHA256 is the release placeholder; replace all three workflow pins after manual publication.");
+    t.diagnostic("WARNING: VESPER_SHA256 is the release placeholder; replace all three workflow pins after manual publication.");
   }
 });
 
@@ -73,8 +73,8 @@ test("signers serialize, regenerate on conflicts and deploy their output SHA", (
   assert.match(script, /for attempt in 1 2 3; do/);
   assert.match(script, /git fetch origin main\n  git reset --hard origin\/main/);
   assert.doesNotMatch(script, /git (?:pull|rebase)/);
-  assert.match(script, /gsp index pending-snapshots --index/);
-  assert.match(script, /gsp index verify --index/);
+  assert.match(script, /vesper index pending-snapshots --index/);
+  assert.match(script, /vesper index verify --index/);
   assert.match(script, /sha=\$\(git rev-parse HEAD\)/);
   const pages = read("pages");
   assert.match(pages, /workflow_call:/);

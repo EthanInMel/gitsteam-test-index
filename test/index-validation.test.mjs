@@ -12,7 +12,7 @@ const validator = path.join(dir, "scripts", "validate-store.mjs");
 const builder = path.join(dir, "scripts", "build-api.mjs");
 
 function copyExample() {
-  const root = fs.mkdtempSync(path.join(scratch, "gitsteam-index-"));
+  const root = fs.mkdtempSync(path.join(scratch, "vesper-index-"));
   fs.cpSync(fixture, root, { recursive: true });
   fs.rmSync(path.join(root, "dist"), { recursive: true, force: true });
   return root;

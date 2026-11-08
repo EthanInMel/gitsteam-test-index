@@ -10,6 +10,6 @@
       "key_id": 0
     }
   },
-  "sources": [{"id": "github", "kind": "github-release", "url_template": "https://github.com/example/example-game/releases/download/{release}/{pack_id}.gspack", "priority": 1}],
+  "sources": [{"id": "github", "kind": "github-release", "url_template": "https://github.com/example/example-game/releases/download/{release}/{pack_id}.vpack", "priority": 1}],
   "signatures": []
 }

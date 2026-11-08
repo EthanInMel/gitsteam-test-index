@@ -1,6 +1,6 @@
 {
   "title": {"en": "Example Game"},
-  "summary": {"en": "A small game used to demonstrate the GitSteam index."},
+  "summary": {"en": "A small game used to demonstrate the Vesper index."},
   "tags": ["demo", "action"],
   "screenshots": [
     {"url": "https://example.com/example-game/screenshot-1.png", "blake3": "0000000000000000000000000000000000000000000000000000000000000000", "width": 1920, "height": 1080}

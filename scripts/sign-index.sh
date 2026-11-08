@@ -8,19 +8,19 @@ for attempt in 1 2 3; do
   git fetch origin main
   git reset --hard origin/main
   if [ "$mode" = snapshot ]; then
-    gsp index pending-snapshots --index . > "$RUNNER_TEMP/pending-apps.txt"
+    vesper index pending-snapshots --index . > "$RUNNER_TEMP/pending-apps.txt"
     while IFS= read -r app; do
-      gsp index snapshot --index . --app "$app"
+      vesper index snapshot --index . --app "$app"
     done < "$RUNNER_TEMP/pending-apps.txt"
   else
     # Repair changed/expiring snapshots before refreshing all timestamps.
-    gsp index pending-snapshots --index . > "$RUNNER_TEMP/pending-apps.txt"
+    vesper index pending-snapshots --index . > "$RUNNER_TEMP/pending-apps.txt"
     while IFS= read -r app; do
-      gsp index snapshot --index . --app "$app"
+      vesper index snapshot --index . --app "$app"
     done < "$RUNNER_TEMP/pending-apps.txt"
-    gsp index timestamp --index . --all
+    vesper index timestamp --index . --all
   fi
-  gsp index verify --index .
+  vesper index verify --index .
   git add apps
   if ! git diff --cached --quiet; then
     git commit -m "chore: refresh ${mode} metadata"
