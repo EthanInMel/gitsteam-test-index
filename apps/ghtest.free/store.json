@@ -5,7 +5,7 @@
   "summary": {
     "en": "A 64 MiB synthetic build served from GitHub Releases."
   },
-  "short_description": "Synthetic test build for Vesper validation.",
+  "short_description": "Synthetic test build for Vesper validation (v5).",
   "tags": [
     "test",
     "windows"
