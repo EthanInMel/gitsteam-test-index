@@ -1,15 +1,1 @@
-{
-  "version": 1,
-  "expires": "2099-01-01T00:00:00Z",
-  "channels": {
-    "stable": {
-      "version": "0.1.0",
-      "platform": "windows-x64",
-      "manifest": {"release_tag": "example-v0.1.0", "asset_name": "manifest.cbor.zst", "size": 0, "blake3": "0000000000000000000000000000000000000000000000000000000000000000"},
-      "encrypted": false,
-      "key_id": 0
-    }
-  },
-  "sources": [{"id": "github", "kind": "github-release", "url_template": "https://github.com/example/example-game/releases/download/{release}/{pack_id}.vpack", "priority": 1}],
-  "signatures": []
-}
+{"signed":{"_type":"targets","spec_version":"1.0.0","version":1,"expires":4070908800,"channels":{"stable":{"version":1,"platform":"windows-x64","manifest":{"release_tag":"example-v0.1.0","asset_name":"manifest.cbor.zst","size":0,"blake3":"0000000000000000000000000000000000000000000000000000000000000000"},"encrypted":false,"key_id":0}},"sources":[{"id":"github","kind":"github","url_template":"https://github.com/example/example-game/releases/download/{release}/{pack_id}","priority":1}],"metadata":{"description.md":{"length":222,"sha256":"3110eda7dc88584a5f90eaa558e8ef9c2f9b6ba19c66974bc7c69af3bb3a83d5"},"store.json":{"length":769,"sha256":"44abffd6cb1d8b761141330dc980723c88642293eff922243068643a4270f7a0"}}},"signatures":[{"keyid":"b600306cfa76723fdec395e53a9b3d9fdb78b1e2d7a23c32fcbcd2dc6d0c4092","sig":"e3c0505428acc01d88daf2e647f85fb4291e5b2d9d42c7819e8125dfda9f7f43511c26dfa6ed94ef2062e546ec3861a0557f4042605e30a2ec63734f09558a0a"}]}

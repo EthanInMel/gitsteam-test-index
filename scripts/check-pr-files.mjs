@@ -13,7 +13,7 @@ export function checkPrFiles(files) {
       : [file?.filename, ...(file?.previous_filename ? [file.previous_filename] : [])];
     for (const name of paths) {
       const match = typeof name === "string"
-        && /^apps\/([^/]+)\/(store\.json|description\.md|targets\.json|snapshot\.json|timestamp\.json)$/.exec(name);
+        && /^apps\/([^/]+)\/(store\.json|description\.md|targets\.json)$/.exec(name);
       if (!match || match[1] === "." || match[1] === ".." || /[\\\x00-\x1f\x7f]/.test(name)) {
         return { allowed: false, reason: `Maintainer merge required for path: ${JSON.stringify(name)}` };
       }

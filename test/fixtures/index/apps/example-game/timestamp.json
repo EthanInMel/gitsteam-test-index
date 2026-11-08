@@ -1,1 +1,1 @@
-{"version":1,"expires":"2099-01-01T00:00:00Z","meta":{},"signatures":[]}
+{"signed":{"_type":"timestamp","spec_version":"1.0.0","version":1,"expires":4070908800,"meta":{"snapshot.json":{"version":1,"length":454,"hashes":{"sha256":"7ef65bbbdf40b60ffcc3e4fe90de684af76a4df79d54eeb67020e1838bffba70"}}}},"signatures":[{"keyid":"b600306cfa76723fdec395e53a9b3d9fdb78b1e2d7a23c32fcbcd2dc6d0c4092","sig":"d9584c368806171a3a9ec53dd79c239d78af2a73f4ab6147fcc0af64ef970f04485a7d67a3f0384ff8f0010901ea4ed65bcfb89a1970ecab9f517d3596a95f0a"}]}

@@ -4,6 +4,32 @@ import fs from "node:fs";
 
 const read = name => fs.readFileSync(new URL(`../.github/workflows/${name}.yml`, import.meta.url), "utf8").replace(/\r\n/g, "\n");
 
+test("all external actions have full SHA pins and version comments; shell scripts use env", () => {
+  for (const name of ["merge", "pages", "snapshot", "timestamp", "verify-pr"]) {
+    const yaml = read(name);
+    for (const line of yaml.split("\n")) {
+      if (/uses:/.test(line) && !/uses: \u002e\u002f/.test(line))
+        assert.match(line, /uses: [\w/-]+@[0-9a-f]{40} # v[\d.]+$/);
+    }
+    const lines = yaml.split("\n");
+    let indent;
+    for (const line of lines) {
+      const run = /^(\s*)run:\s*(.*)$/.exec(line);
+      if (run) { indent = run[1].length; assert.ok(!run[2].includes("${{")); }
+      else if (indent !== undefined && line.trim() && line.search(/\S/) > indent)
+        assert.ok(!line.includes("${{"), `${name}: expressions must enter shell through env`);
+      else if (line.trim()) indent = undefined;
+    }
+  }
+});
+
+test("verify-pr executes the shared path policy with labels and base SHA through env", () => {
+  const yaml = read("verify-pr");
+  assert.match(yaml, /node scripts\/check-verify-paths.mjs/);
+  assert.match(yaml, /BASE_SHA: \$\{\{ github.event.pull_request.base.sha \}\}/);
+  assert.match(yaml, /PR_LABELS: \$\{\{ join\(/);
+});
+
 test("all index jobs install the same checksum-pinned public binary", t => {
   const pins = ["verify-pr", "snapshot", "timestamp"].map(name => {
     const yaml = read(name);
@@ -75,6 +101,7 @@ test("signers serialize, regenerate on conflicts and deploy their output SHA", (
   assert.doesNotMatch(script, /git (?:pull|rebase)/);
   assert.match(script, /vesper index pending-snapshots --index/);
   assert.match(script, /vesper index verify --index/);
+  assert.doesNotMatch(script, /--initialize/);
   assert.match(script, /sha=\$\(git rev-parse HEAD\)/);
   const pages = read("pages");
   assert.match(pages, /workflow_call:/);

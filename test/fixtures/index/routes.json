@@ -1,1 +1,1 @@
-{"version":1,"expires":"2099-01-01T00:00:00Z","apps":{"example-game":{"keys":[],"threshold":1}},"signatures":[]}
+{"signed":{"_type":"routes","spec_version":"1.0.0","version":1,"expires":4070908800,"apps":{"example-game":{"keys":["197f6b23e16c8532c6abc838facd5ea789be0c76b2920334039bfa8b3d368d61"],"threshold":1}}},"signatures":[{"keyid":"b600306cfa76723fdec395e53a9b3d9fdb78b1e2d7a23c32fcbcd2dc6d0c4092","sig":"750937b86de03aeefaefc09657a3eeb588f3c7a2c5fdb79953673f6bb1c0418cf7fb9f1d8255ed60ee8cfbeccd139d0b6cc8dae1e81a01298128940c93b61b00"}]}

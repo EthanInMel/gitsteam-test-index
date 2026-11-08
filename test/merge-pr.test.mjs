@@ -8,7 +8,7 @@ const root = path.resolve(import.meta.dirname, "..");
 const scratch = path.join(root, "test/.tmp");
 fs.mkdirSync(scratch, { recursive: true });
 const bash = process.platform === "win32"
-  ? ["C:/Program Files/Git/bin/bash.exe", "C:/Program Files/Git/usr/bin/bash.exe"].find(fs.existsSync)
+  ? [path.join(process.env.ProgramFiles, "Git/bin/bash.exe"), path.join(process.env.ProgramFiles, "Git/usr/bin/bash.exe")].find(fs.existsSync)
   : "bash";
 const available = bash && spawnSync(bash, ["--version"]).status === 0;
 const posix = file => file.replaceAll("\\", "/").replace(/^([A-Za-z]):/, (_, drive) => `/${drive.toLowerCase()}`);

@@ -6,40 +6,31 @@ permissions:
   contents: read
   pull-requests: read
 env:
-  VESPER_VERSION: '0.3.0'
-  VESPER_SHA256: '8baf4cb0e8e5b5045250bcdc552c898c744c06a05fb9d6fecdac8388073c20bc'
+  VESPER_VERSION: '0.4.0'
+  VESPER_SHA256: '82f6812b76b0d708504354b469f17e0ffe47b8fd65db8e9e31b136136ec9de94'
   VESPER_RELEASES_REPO: EthanInMel/gsp-releases
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with: {fetch-depth: 0}
       - name: Checkout base index for rollback comparison
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: .base-index
           fetch-depth: 1
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: {node-version: 22}
       - name: Check changed paths
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         shell: bash
         run: |
           set -euo pipefail
-          files=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD)
-          bad=$(printf '%s\n' "$files" | awk '!/^apps\/[^/]+\/(store.json|description.md|targets.json|snapshot.json|timestamp.json)$/ && $0 != "routes.json" {print}')
-          if [ -n "$bad" ]; then echo "$bad"; exit 1; fi
-          apps=$(printf '%s\n' "$files" | awk -F/ '$1 == "apps" {print $2}' | sort -u)
-          app_count=$(printf '%s\n' "$apps" | sed '/^$/d' | wc -l)
-          if [ "$app_count" -gt 1 ]; then
-            echo 'a pull request may change only one apps/<app_id>/ directory'
-            exit 1
-          fi
-          if printf '%s\n' "$files" | grep -qx 'routes.json'; then
-            labels='${{ join(github.event.pull_request.labels.*.name, ',') }}'
-            case ",$labels," in *,maintainer-approved,*) ;; *) echo 'routes.json changes require maintainer-approved label'; exit 1 ;; esac
-          fi
+          node scripts/check-verify-paths.mjs
       - name: Validate metadata
         run: node scripts/validate-store.mjs .
       - name: Install verified vesper binary
@@ -53,8 +44,10 @@ jobs:
           echo "$RUNNER_TEMP/vesper" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/vesper/vesper" --version
       - name: Verify signed index
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
         run: |
           set -euo pipefail
-          apps=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | awk -F/ '$1 == "apps" {print $2}' | sort -u)
+          apps=$(git diff --name-only "$BASE_SHA" HEAD | awk -F/ '$1 == "apps" {print $2}' | sort -u)
           if [ -z "$apps" ]; then vesper index verify --targets-only --index . --previous .base-index; else for app in $apps; do vesper index verify --targets-only --index . --app "$app" --previous .base-index; done; fi
