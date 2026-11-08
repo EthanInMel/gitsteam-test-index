@@ -7,7 +7,7 @@ permissions:
   pull-requests: read
 env:
   VESPER_VERSION: '0.4.0'
-  VESPER_SHA256: '82f6812b76b0d708504354b469f17e0ffe47b8fd65db8e9e31b136136ec9de94'
+  VESPER_SHA256: '8401d69fe9f9e3f87886f8a332fdae2ff4d61dbd7dfead2602561775d70d4bb0'
   VESPER_RELEASES_REPO: EthanInMel/gsp-releases
 jobs:
   verify:
