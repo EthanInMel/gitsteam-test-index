@@ -45,7 +45,7 @@ push workflow. The four binary-consuming workflows share version/checksum pins.
 
 `snapshot.yml` and `timestamp.yml` use `VESPER_ONLINE_KEY` only in trusted branch workflows. They share the `index-signing-main` job concurrency group. Each attempt fetches current `main`, discards the previous local signing attempt, and regenerates signatures before pushing; three push failures fail the job. Signed commits are never rebased onto newer metadata.
 
-The current Vesper/1 metadata and signing pipeline require **vesper 0.5.0**. `vesper index pending-snapshots` selects only apps whose canonical targets description changed or whose snapshot has less than two days remaining. `vesper index snapshot` does nothing for other apps; a renewed snapshot increments its own previous version and renews that app's timestamp in the same command. Timestamp versions increment independently from the previous timestamp. Snapshot expiry is checked daily as well as after pushes and merges; timestamps retain one-day validity and refresh every six hours.
+The current Vesper/1 metadata and signing pipeline require **vesper 0.6.0**. `vesper index pending-snapshots` selects only apps whose canonical targets description changed or whose snapshot has less than two days remaining. `vesper index snapshot` does nothing for other apps; a renewed snapshot increments its own previous version and renews that app's timestamp in the same command. Timestamp versions increment independently from the previous timestamp. Snapshot expiry is checked daily as well as after pushes and merges; timestamps retain one-day validity and refresh every six hours.
 
 Default `vesper index verify` checks developer signatures, online signatures when defined by root, expiry and both canonical version/length/SHA-256 links: timestamp -> snapshot -> targets. Untrusted PR feedback explicitly uses `--targets-only --previous .base-index`, because online signing happens after merge and no online key is available to a PR. That pre-signing check is not a complete published-index verification. Signing always runs the full verifier before committing.
 
@@ -58,10 +58,10 @@ Tests use `test/fixtures/index`, not the live `apps/` catalogue. The merge shell
 All four binary-consuming index workflows download `vesper-linux-x64` from the public binary-only repository
 `EthanInMel/gsp-releases`, check its pinned SHA-256 before execution, and never need
 a source checkout. The template uses the pre-publication
-placeholders `VESPER_VERSION: '0.5.0'` and
+placeholders `VESPER_VERSION: '0.6.0'` and
 `VESPER_SHA256: '0000000000000000000000000000000000000000000000000000000000000000'`
 in all four workflows. Before using the signing pipeline, the maintainer must
-build and publish vesper 0.5.0 and update the checksum in all four workflows from
+build and publish vesper 0.6.0 and update the checksum in all four workflows from
 the reviewed `SHA256SUMS`. The static workflow tests warn about the placeholder
 without failing; workflow execution fails closed until the real checksum is
 supplied. Keep `VESPER_RELEASES_REPO` identical across workflows. No publication
@@ -80,3 +80,10 @@ highest historical online versions. See
 [version recovery and client verification](../docs/index-layout.md#online-version-recovery).
 The example and fixture use a public test-only signing seed (32 bytes of `0x2a`);
 replace all example trust keys before deployment.
+
+Optional R2 mirrors are configured by each developer, using the
+[publishing options](../docs/publishing.md#optional-r2-mirror). Signed targets
+contain GitHub at priority 0 and an R2 mirror of all channels at priority 1. Clients
+probe enabled sources and select the fastest; priority establishes the initial
+order and resolves ties. Central aggregation requires no R2 credentials and
+continues to verify the developer's signed bundle.

@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 permissions: {actions: write, contents: write, pages: write, id-token: write}
 env:
-  VESPER_VERSION: '0.5.0'
-  VESPER_SHA256: '7bee1c69abca6d774694ea69872fc3a8462373dc43c64180c4f71cc8a68d398b'
+  VESPER_VERSION: '0.6.0'
+  VESPER_SHA256: '09683f2212684f1ffd05a0de4245dbfae269a6d3b1918ef57ad2c30ecd4a3766'
   VESPER_RELEASES_REPO: EthanInMel/gsp-releases
 jobs:
   timestamp:
