@@ -37,7 +37,7 @@ test("all index jobs install the same checksum-pinned public binary", t => {
     assert.match(yaml, /curl -fsSL --retry 3/);
     assert.match(yaml, /sha256sum -c -/);
     assert.match(yaml, /set -euo pipefail/);
-    assert.match(yaml, /https:\/\/github\.com\/\$VESPER_RELEASES_REPO\/releases\/download\/vesper-v\$VESPER_VERSION\/vesper-linux-x64/);
+    assert.match(yaml, /https:\/\/github\.com\/\$VESPER_RELEASES_REPO\/releases\/download\/vesper-v\$VESPER_VERSION\/vesper-cli-linux-x64/);
     assert.match(yaml, /chmod \+x "\$RUNNER_TEMP\/vesper\/vesper"/);
     assert.match(yaml, /echo "\$RUNNER_TEMP\/vesper" >> "\$GITHUB_PATH"/);
     assert.match(yaml, /"\$RUNNER_TEMP\/vesper\/vesper" --version/);
