@@ -6,7 +6,7 @@ permissions: {actions: write, contents: write, pages: write, id-token: write}
 env:
   VESPER_VERSION: '0.6.0'
   VESPER_SHA256: '09683f2212684f1ffd05a0de4245dbfae269a6d3b1918ef57ad2c30ecd4a3766'
-  VESPER_RELEASES_REPO: EthanInMel/gsp-releases
+  VESPER_RELEASES_REPO: Baryon-Interactive/vesper
 jobs:
   timestamp:
     concurrency:

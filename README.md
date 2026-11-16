@@ -55,8 +55,8 @@ Tests use `test/fixtures/index`, not the live `apps/` catalogue. The merge shell
 
 ## Prebuilt vesper installation
 
-All four binary-consuming index workflows download `vesper-linux-x64` from the public binary-only repository
-`EthanInMel/gsp-releases`, check its pinned SHA-256 before execution, and never need
+All four binary-consuming index workflows download `vesper-linux-x64` from the Releases of
+`Baryon-Interactive/vesper`, check its pinned SHA-256 before execution, and never need
 a source checkout. The template uses the pre-publication
 placeholders `VESPER_VERSION: '0.6.0'` and
 `VESPER_SHA256: '0000000000000000000000000000000000000000000000000000000000000000'`

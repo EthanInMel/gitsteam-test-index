@@ -47,7 +47,7 @@ test("all index jobs install the same checksum-pinned public binary", t => {
     const pin = [value("VESPER_VERSION"), value("VESPER_SHA256"), value("VESPER_RELEASES_REPO")];
     assert.match(pin[0] ?? "", /^\d+\.\d+\.\d+$/);
     assert.match(pin[1] ?? "", /^[0-9a-f]{64}$/);
-    assert.equal(pin[2], "EthanInMel/gsp-releases");
+    assert.equal(pin[2], "Baryon-Interactive/vesper");
     // Verify that a checksum error stops execution before the file can run.
     assert.ok(yaml.indexOf("sha256sum -c -") < yaml.indexOf("chmod +x"));
     return pin;
