@@ -23,7 +23,7 @@ Offline maintainers sign `routes.json` with the platform root threshold. Develop
 
 `verify-pr.yml` uses `pull_request` without secrets. Its checks provide fast feedback to contributors; a PR can change those checks, so their success alone never authorizes a merge. `merge.yml` uses `workflow_run` and checks out only the repository default branch with persisted credentials disabled. Its trusted `scripts/check-pr-files.mjs` independently checks the entire paginated PR file list, including old rename paths, before merging. It refuses incomplete file lists and verifies the PR is open, targets the default branch of this repository, and has the exact `workflow_run.head_sha`.
 
-Automatic merge permits only `store.json`, `description.md`, and `targets.json` under one `apps/<app_id>/` directory for routes without `metadata_url`. A hosted app always requires maintainer handling for app PRs; verify-pr checks both base and proposed routes. The `maintainer-approved` label permits verification feedback but does not authorize automatic merging. Empty diffs, changes to two apps, `routes.json`, `.github/`, `scripts/`, `schemas/`, `root.json`, and every other path require a maintainer merge; the workflow logs the reason. A `routes.json` change requires the `maintainer-approved` label for PR feedback and cannot merge automatically. `--match-head-commit` prevents merging a head changed after inspection. For fork PRs without a `workflow_run.pull_requests` entry, the job finds the open PR by head repository, branch, and exact head SHA. It never checks out PR code or downloads PR artifacts with merge credentials.
+Automatic merge permits only `store.json`, `description.md`, and `targets.json` under one `apps/<app_id>/` directory for routes without `metadata_url`. A hosted app always requires maintainer handling for app PRs; verify-pr checks both base and proposed routes. The `maintainer-approved` label permits verification feedback but does not authorize automatic merging. Empty diffs, changes to two apps, `routes.json`, `.github/`, `scripts/`, `schemas/`, `root.json`, `<N>.root.json`, and every other path require a maintainer merge; the workflow logs the reason. A `routes.json`, `root.json` or `<N>.root.json` change requires the `maintainer-approved` label for PR feedback and cannot merge automatically. `--match-head-commit` prevents merging a head changed after inspection. For fork PRs without a `workflow_run.pull_requests` entry, the job finds the open PR by head repository, branch, and exact head SHA. It never checks out PR code or downloads PR artifacts with merge credentials.
 
 `aggregate.yml` runs every 15 minutes (`*/15 * * * *`) and by manual dispatch.
 It checks out `main` without persisted credentials, holds no online key and calls
@@ -45,7 +45,7 @@ push workflow. The four binary-consuming workflows share version/checksum pins.
 
 `snapshot.yml` and `timestamp.yml` use `VESPER_ONLINE_KEY` only in trusted branch workflows. They share the `index-signing-main` job concurrency group. Each attempt fetches current `main`, discards the previous local signing attempt, and regenerates signatures before pushing; three push failures fail the job. Signed commits are never rebased onto newer metadata.
 
-The current Vesper/1 metadata and signing pipeline require **vesper 0.7.0**. `vesper index pending-snapshots` selects only apps whose canonical targets description changed or whose snapshot has less than two days remaining. `vesper index snapshot` does nothing for other apps; a renewed snapshot increments its own previous version and renews that app's timestamp in the same command. Timestamp versions increment independently from the previous timestamp. Snapshot expiry is checked daily as well as after pushes and merges; timestamps retain one-day validity and refresh every six hours.
+The current Vesper/1 metadata and signing pipeline require **vesper 0.7.1**. `vesper index pending-snapshots` selects only apps whose canonical targets description changed or whose snapshot has less than two days remaining. `vesper index snapshot` does nothing for other apps; a renewed snapshot increments its own previous version and renews that app's timestamp in the same command. Timestamp versions increment independently from the previous timestamp. Snapshot expiry is checked daily as well as after pushes and merges; timestamps retain one-day validity and refresh every six hours.
 
 Default `vesper index verify` checks developer signatures, online signatures when defined by root, expiry and both canonical version/length/SHA-256 links: timestamp -> snapshot -> targets. Untrusted PR feedback explicitly uses `--targets-only --previous .base-index`, because online signing happens after merge and no online key is available to a PR. That pre-signing check is not a complete published-index verification. Signing always runs the full verifier before committing.
 
@@ -57,7 +57,7 @@ Tests use `test/fixtures/index`, not the live `apps/` catalogue. The merge shell
 
 All four binary-consuming index workflows download `vesper-cli-linux-x64` from the Releases of
 `Baryon-Interactive/vesper`, check its pinned SHA-256 before execution, and never need
-a source checkout. All four workflows pin `VESPER_VERSION: '0.7.0'` and the
+a source checkout. All four workflows pin `VESPER_VERSION: '0.7.1'` and the
 `vesper-cli-linux-x64` SHA-256 from that release's `SHA256SUMS`. To move to a newer
 release, update the version and checksum together in all four workflows. The static
 workflow tests warn about an all-zero placeholder without failing; workflow
@@ -77,6 +77,24 @@ highest historical online versions. See
 [version recovery and client verification](../docs/index-layout.md#online-version-recovery).
 The example and fixture use a public test-only signing seed (32 bytes of `0x2a`);
 replace all example trust keys before deployment.
+
+## Root renewal and key rotation
+
+The root expires (one year after `vesper index init`), so renew it before then.
+Clients accept a new root without an update when it is published as
+`<N>.root.json` next to `root.json` and signed by a threshold of the previous
+root's keys and a threshold of its own. Offline holders run
+`vesper index root-draft`, `root-sign` (once per key) and `root-publish`;
+after replacing root keys, re-sign `routes.json` with `route-sign`. Commit
+`root.json`, every `<N>.root.json` and `routes.json` in one maintainer PR with
+the `maintainer-approved` label; `verify-pr` then checks that the new chain
+extends the base `root.json`, and `build-api.mjs` copies the versioned roots and a
+`404.html` into `dist` so Pages serves them and ends the chain with a real 404.
+Never delete old `<N>.root.json` files: older clients chain through them. See
+[root renewal and rotation](../docs/index-layout.md#root-renewal-and-rotation) for the
+client rules and the full command sequence. The `root-*` commands and the chain
+check in `index verify` need Vesper 0.7.1 or later; 0.7.0 only checks that
+`root.json` is self-signed.
 
 Optional R2 mirrors are configured by each developer, using the
 [publishing options](../docs/publishing.md#optional-r2-mirror). Signed targets

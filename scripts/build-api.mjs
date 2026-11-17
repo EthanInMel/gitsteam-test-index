@@ -19,9 +19,17 @@ const copy = (src, dst) => {
 };
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
-for (const file of ["root.json", "routes.json"])
+// Versioned roots (1.root.json, 2.root.json, ...) let clients chain from the
+// root they already trust to the current root.json.
+const rootFiles = fs
+  .readdirSync(root)
+  .filter((name) => /^[1-9][0-9]*\.root\.json$/.test(name));
+for (const file of ["root.json", "routes.json", ...rootFiles])
   if (fs.existsSync(path.join(root, file)))
     copy(path.join(root, file), path.join(out, file));
+// A real 404 marks the end of the root chain; without a top-level 404.html,
+// Cloudflare Pages would answer missing paths as a single-page application.
+fs.writeFileSync(path.join(out, "404.html"), "Not found\n", "utf8");
 const appsRoot = path.join(root, "apps");
 const routes = JSON.parse(fs.readFileSync(path.join(root, "routes.json"), "utf8")).signed.apps;
 const apps = fs.existsSync(appsRoot)

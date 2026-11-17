@@ -60,3 +60,22 @@ test("removing a route delists retained app files", () => {
     assert.equal(fs.existsSync(path.join(temp, "dist/apps/example-game/targets.json")), false);
   } finally { fs.rmSync(temp, {recursive: true, force: true}); }
 });
+
+test("versioned roots are served next to root.json with a real 404 page", () => {
+  const temp = fs.mkdtempSync(path.join(scratch, "roots-"));
+  try {
+    fs.cpSync(fixture, temp, {recursive: true});
+    fs.copyFileSync(path.join(temp, "root.json"), path.join(temp, "1.root.json"));
+    fs.copyFileSync(path.join(temp, "root.json"), path.join(temp, "2.root.json"));
+    fs.writeFileSync(path.join(temp, "root.draft.json"), "{}");
+    fs.writeFileSync(path.join(temp, "01.root.json"), "{}");
+    const result = spawnSync(process.execPath, [build, "--index", temp], {encoding: "utf8"});
+    assert.equal(result.status, 0, result.stderr);
+    const dist = path.join(temp, "dist");
+    for (const name of ["root.json", "1.root.json", "2.root.json"])
+      assert.deepEqual(fs.readFileSync(path.join(dist, name)), fs.readFileSync(path.join(temp, name)));
+    assert.equal(fs.existsSync(path.join(dist, "root.draft.json")), false);
+    assert.equal(fs.existsSync(path.join(dist, "01.root.json")), false);
+    assert.equal(fs.existsSync(path.join(dist, "404.html")), true);
+  } finally { fs.rmSync(temp, {recursive: true, force: true}); }
+});

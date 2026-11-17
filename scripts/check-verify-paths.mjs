@@ -5,12 +5,14 @@ import fs from "node:fs";
 
 export function checkVerifyPaths(files, labels = "", registries = []) {
   if (!Array.isArray(files) || !files.length) return { allowed: false, reason: "Empty PR diff" };
-  const routes = files.includes("routes.json");
-  if (routes && !labels.split(",").includes("maintainer-approved")) {
-    return { allowed: false, reason: "routes.json requires maintainer-approved" };
+  // routes.json and the root files (root.json, <N>.root.json) are signed offline.
+  const maintainerFile = name => name === "routes.json" || name === "root.json" || /^[1-9][0-9]*\.root\.json$/.test(name);
+  const maintained = files.filter(maintainerFile);
+  if (maintained.length && !labels.split(",").includes("maintainer-approved")) {
+    return { allowed: false, reason: `${maintained.join(", ")} requires maintainer-approved` };
   }
-  const appFiles = files.filter(name => name !== "routes.json");
-  if (!appFiles.length) return { allowed: routes, reason: "Maintainer route change" };
+  const appFiles = files.filter(name => !maintainerFile(name));
+  if (!appFiles.length) return { allowed: true, reason: "Maintainer route or root change" };
   const paths = checkPrFiles(appFiles);
   if (!paths.allowed) return paths;
   return labels.split(",").includes("maintainer-approved") ? paths : checkPrFiles(appFiles, registries);

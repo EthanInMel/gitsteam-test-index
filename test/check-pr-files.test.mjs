@@ -43,3 +43,12 @@ test("developer-hosted app PRs require maintainer handling in either registry", 
   assert.equal(checkVerifyPaths(files, "", [{signed: {apps: {}}}, hosted]).allowed, false);
   assert.equal(checkPrFiles([{filename: "apps/game/store.json", previous_filename: "apps/other/store.json"}], [hosted]).allowed, false);
 });
+
+test("root files require maintainer approval in verify-pr and never merge automatically", () => {
+  for (const files of [["root.json"], ["root.json", "2.root.json"], ["3.root.json", "routes.json"]]) {
+    assert.equal(checkVerifyPaths(files, "").allowed, false);
+    assert.equal(checkVerifyPaths(files, "maintainer-approved").allowed, true);
+    assert.equal(checkPrFiles(files.map(filename => ({ filename }))).allowed, false);
+  }
+  assert.equal(checkVerifyPaths(["root.json", "apps/game/snapshot.json"], "maintainer-approved").allowed, false);
+});

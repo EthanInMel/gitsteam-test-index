@@ -6,8 +6,8 @@ permissions:
   contents: read
   pull-requests: read
 env:
-  VESPER_VERSION: '0.7.0'
-  VESPER_SHA256: 'f5935637d9ed0b715be59928238f1baa377c4d08cf6d057df43ceda1b70d32a0'
+  VESPER_VERSION: '0.7.1'
+  VESPER_SHA256: 'e3f0c72c91aa962c5494a089570a14f6b4477602331df4fc7c7c45720d6da0f0'
   VESPER_RELEASES_REPO: Baryon-Interactive/vesper
 jobs:
   verify:
